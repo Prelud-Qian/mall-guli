@@ -3,13 +3,13 @@ package com.mall.member.member.controller;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.exception.BizCodeEnum;
+import com.mall.member.member.exception.PhoneExistException;
+import com.mall.member.member.exception.UsernameExistException;
 import com.mall.member.member.feign.CouponFeignService;
+import com.mall.member.member.vo.MemberRegistVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.mall.member.member.entity.MemberEntity;
 import com.mall.member.member.service.MemberService;
@@ -42,6 +42,19 @@ public class MemberController {
         R memberCoupons = couponFeignService.memberCoupons();
 
         return R.ok().put("member", memberEntity).put("coupons", memberCoupons.get("coupons"));
+    }
+
+    @PostMapping("/regist")
+    public R regist(@RequestBody MemberRegistVo vo){
+        try{
+            memberService.regist(vo);
+        }catch (PhoneExistException e){
+            return R.error(BizCodeEnum.PHONE_EXIST_EXCEPTION.getCode(), BizCodeEnum.PHONE_EXIST_EXCEPTION.getMsg());
+        }catch (UsernameExistException e){
+            return R.error(BizCodeEnum.USER_EXIST_EXCEPTION.getCode(), BizCodeEnum.USER_EXIST_EXCEPTION.getMsg());
+        }
+
+        return R.ok();
     }
 
     /**
