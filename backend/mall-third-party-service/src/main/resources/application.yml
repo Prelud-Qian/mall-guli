@@ -9,6 +9,12 @@ spring:
       oss:
         endpoint: oss-cn-shanghai.aliyuncs.com
         bucket: mall-prelud
+      sms:
+        host: shturl.cc/KHTYprKMmQ3ljRtloHFdRg5XaqOZ
+        path: /sms/
+        skin: 1
+        sign: 1
+        appcode: 93b7e19861a24c519a7548b17dc16d75
 
   application:
     name: mall-third-party-service

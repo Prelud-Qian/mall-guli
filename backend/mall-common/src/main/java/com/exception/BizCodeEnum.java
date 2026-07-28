@@ -29,7 +29,8 @@ public enum BizCodeEnum {
     // 仓储采购模块
     PURCHASE_MERGE_FAIL(15001, "合并失败：仅【新建】状态采购单、新建状态采购需求允许合并"),
 
-    PRODUCT_UP_EXCEPTION(11000, "商品上架异常");
+    PRODUCT_UP_EXCEPTION(11000, "商品上架异常"),
+    SMS_CODE_EXCEPTION(10002, "验证码获取频率太高，稍后再试");
 
     private int code;
     private String msg;

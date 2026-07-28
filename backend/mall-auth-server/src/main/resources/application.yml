@@ -1,0 +1,7 @@
+server:
+  servlet:
+    context-path: /
+
+spring:
+  profiles:
+    active:  # 清空 renren-fast 带入的 dev profile

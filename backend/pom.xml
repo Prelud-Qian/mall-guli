@@ -23,6 +23,7 @@
         <module>mall-gateway</module>
         <module>mall-third-party-service</module>
         <module>mall-search</module>
+        <module>mall-auth-server</module>
     </modules>
 
     <dependencyManagement>
