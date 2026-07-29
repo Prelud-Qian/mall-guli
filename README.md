@@ -1,6 +1,6 @@
 # mall-platform
 
-谷粒商城 — 全栈微服务电商平台，基于 Spring Cloud Alibaba 构建。
+全栈微服务电商平台，基于 Spring Cloud Alibaba 构建。
 
 ## 项目结构
 
