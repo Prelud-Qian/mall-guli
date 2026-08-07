@@ -1,4 +1,4 @@
-package com.example.mall_gateway;
+package com.mall.mall_gateway;
 
 import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure;
 import org.springframework.boot.SpringApplication;

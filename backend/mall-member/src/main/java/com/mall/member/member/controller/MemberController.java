@@ -49,7 +49,7 @@ public class MemberController {
     public R login(@RequestBody MemberLoginVo vo){
         MemberEntity entity = memberService.login(vo);
         if (entity != null){
-            return R.ok();
+            return R.ok().put("data", entity);
         }else {
             return R.error(BizCodeEnum.LOGINACCOUNT_PASSWORD_INVALID_EXCEPTION.getCode(), BizCodeEnum.LOGINACCOUNT_PASSWORD_INVALID_EXCEPTION.getMsg());
         }

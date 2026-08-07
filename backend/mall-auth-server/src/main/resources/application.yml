@@ -5,3 +5,6 @@ server:
 spring:
   profiles:
     active:  # 清空 renren-fast 带入的 dev profile
+  redis:
+    host: 192.168.88.128
+    port: 6379

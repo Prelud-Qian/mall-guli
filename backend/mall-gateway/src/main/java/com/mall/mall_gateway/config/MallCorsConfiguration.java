@@ -1,4 +1,4 @@
-package com.example.mall_gateway.config;
+package com.mall.mall_gateway.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
