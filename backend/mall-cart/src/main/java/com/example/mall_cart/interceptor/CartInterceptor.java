@@ -19,6 +19,20 @@ public class CartInterceptor implements HandlerInterceptor {
     public static ThreadLocal<UserInfoTo> threadLocal = new ThreadLocal<>();
 
     /**
+     * 临时用户：
+     *   - 数据在 Cookie 里（user-key）
+     *   - Cookie 过期 = 数据丢失 ❌
+     *   - 必须刷新 Cookie 来保活
+     *
+     * 登录用户：
+     *   - 数据在服务端（Session/Redis）
+     *   - Cookie 只是 Session ID（钥匙）
+     *   - 钥匙过期了？去服务端续期就行 ✅
+     *   - 不需要频繁刷新 Cookie
+     *   因为登录用户有 userId，所以根本不需要依赖 Cookie 来识别身份！
+     */
+
+    /**
      * 目标方法执行之前拦截
      *
      * @param request
@@ -30,14 +44,17 @@ public class CartInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         UserInfoTo userInfoTo = new UserInfoTo();
-
+        // 服务器里有非常多 Session，每个在线用户都有一个独立的 Session。
+        // 从请求中获取 HttpSession  如果不存在，会自动创建
         HttpSession session = request.getSession();
+        // Session 确实需要 Session ID 来取数据。但这段代码中 session.getAttribute() 不需要你手动传 Session ID，是因为 Spring 已经帮你做好了"自动匹配"。
         MemberResponseVo member = (MemberResponseVo) session.getAttribute(AuthServerConstant.LOGIN_USER);
         if (member != null) {
             // 用户登录
             userInfoTo.setUserId(member.getId());
         }
 
+        // 从 HTTP 请求中获取所有 Cookie 数组
         Cookie[] cookies = request.getCookies();
         if (cookies != null && cookies.length > 0) {
             for (Cookie cookie : cookies) {

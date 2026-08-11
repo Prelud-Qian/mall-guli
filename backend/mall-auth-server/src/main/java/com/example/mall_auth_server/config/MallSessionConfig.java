@@ -8,7 +8,7 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
 import org.springframework.session.web.http.CookieSerializer;
 import org.springframework.session.web.http.DefaultCookieSerializer;
 
-@EnableRedisHttpSession
+@EnableRedisHttpSession // 开启 Redis 支持的 Spring Session
 @Configuration
 public class MallSessionConfig {
 
@@ -24,6 +24,7 @@ public class MallSessionConfig {
 
     @Bean
     public RedisSerializer<Object> springSessionDefaultRedisSerializer() {
+        // 设置 Session 数据在 Redis 中的存储格式为 JSON
         return new GenericJackson2JsonRedisSerializer();
     }
 }

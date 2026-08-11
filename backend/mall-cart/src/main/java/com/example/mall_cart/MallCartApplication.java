@@ -11,7 +11,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 		DruidDataSourceAutoConfigure.class})
 @EnableDiscoveryClient
 @EnableFeignClients
-
 public class MallCartApplication {
 
 	public static void main(String[] args) {
