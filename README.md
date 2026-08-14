@@ -13,6 +13,7 @@ mall-platform/
 │   ├── mall-product/                 # 商品服务：SPU/SKU、品牌、分类、属性
 │   ├── mall-member/                  # 会员服务：注册、登录、积分
 │   ├── mall-coupon/                  # 优惠券服务
+│   ├── mall-cart/                     # 购物车服务：Redis 购物车 + Spring Session
 │   ├── mall-order/                   # 订单服务
 │   ├── mall-ware/                    # 仓储服务：库存管理
 │   ├── mall-search/                  # 检索服务（Elasticsearch）
@@ -99,6 +100,6 @@ npm run dev
 - [x] 商品服务（CRUD + 详情页）
 - [x] 检索服务（Elasticsearch）
 - [x] 认证服务（登录/注册页面）
-- [ ] 购物车
+- [x] 购物车（添加/删除/修改/选中、临时用户标识、登录合并）
 - [ ] 订单
 - [ ] 支付

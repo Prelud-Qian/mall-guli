@@ -3,6 +3,7 @@ package com.example.mall_cart.controller;
 import com.constant.AuthServerConstant;
 import com.example.mall_cart.interceptor.CartInterceptor;
 import com.example.mall_cart.service.CartService;
+import com.example.mall_cart.vo.Cart;
 import com.example.mall_cart.vo.CartItem;
 import com.example.mall_cart.vo.UserInfoTo;
 import org.bouncycastle.math.raw.Mod;
@@ -24,6 +25,29 @@ public class CartController {
     @Autowired
     CartService cartService;
 
+    @GetMapping("/deleteItem")
+    public String deleteItem(@RequestParam("skuId") Long skuId){
+        cartService.deleteItem(skuId);
+
+        return "redirect:http://cart.mall.com/cart.html";
+    }
+
+    @GetMapping("/countItem")
+    public String countItem(@RequestParam("skuId") Long skuId,
+                            @RequestParam("num") Integer num){
+        cartService.changeItemCount(skuId, num);
+
+        return "redirect:http://cart.mall.com/cart.html";
+    }
+
+    @GetMapping("/checkItem")
+    public String checkItem(@RequestParam("skuId") Long skuId,
+                            @RequestParam("check") Integer check){
+        cartService.checkItem(skuId, check);
+
+        return "redirect:http://cart.mall.com/cart.html";
+    }
+
     /**
      * 浏览器有一个cookie；user-key；标识用户身份，一个月后过期；
      * 如果第一次使用id的购物车功能，都会给一个临时的用户身份；
@@ -36,11 +60,9 @@ public class CartController {
      * @return
      */
     @GetMapping("/cart.html")
-    public String cartListPage() {
-
-        UserInfoTo userInfoTo = CartInterceptor.threadLocal.get();
-        System.out.println(userInfoTo);
-
+    public String cartListPage(Model model) throws ExecutionException, InterruptedException {
+        Cart cart = cartService.getCart();
+        model.addAttribute("cart", cart);
         return "cartList";
     }
 
