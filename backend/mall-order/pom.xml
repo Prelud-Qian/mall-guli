@@ -35,6 +35,14 @@
 	<!-- 4. 项目核心依赖（根据子模块需求保留/新增，基础依赖通用） -->
 	<dependencies>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-amqp</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.mall</groupId>
 			<artifactId>mall-common</artifactId>
 			<version>0.1-SNAPSHOT</version>

@@ -2,7 +2,7 @@ spring:
   datasource:
     username: root
     password: 070716wzq
-    url: jdbc:mysql://192.168.88.129:3306/mall_oms
+    url: jdbc:mysql://192.168.88.128:3306/mall_oms
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 mybatis-plus:
@@ -12,4 +12,4 @@ mybatis-plus:
       id-type: auto
 
 server:
-  port: 9000
+  port: 9010
