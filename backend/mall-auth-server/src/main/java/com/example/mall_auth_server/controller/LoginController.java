@@ -139,13 +139,18 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public String login(UserLoginVo vo, RedirectAttributes redirectAttributes, HttpSession session){
+    public String login(UserLoginVo vo, RedirectAttributes redirectAttributes, HttpSession session,
+                        @RequestParam(value = "redirect_url", required = false) String redirectUrl){
         // 远程登录
         R login = memberFeignService.login(vo);
         if (login.getCode() == 0){
             // 成功
             MemberResponseVo data = login.getData("data", new TypeReference<MemberResponseVo>() {});
             session.setAttribute(LOGIN_USER,data);
+            // 从结算页等被拦截跳转登录时，登录成功后回跳原页面
+            if (!StringUtils.isEmpty(redirectUrl) && redirectUrl.startsWith("http://order.mall.com")) {
+                return "redirect:" + redirectUrl;
+            }
             return "redirect:http://mall.com";
         }else {
             // 失败
