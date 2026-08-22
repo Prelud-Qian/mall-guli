@@ -1,5 +1,6 @@
 package com.mall.order.order.vo;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -14,4 +15,6 @@ public class OrderItemVo {
     private BigDecimal price;
     private Integer count;
     private BigDecimal totalPrice;
+
+    private BigDecimal weight;
 }

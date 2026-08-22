@@ -1,11 +1,15 @@
 package com.mall.order.order.service.impl;
 
+import com.alibaba.fastjson.TypeReference;
+import com.mall.common.utils.R;
 import com.mall.order.order.feign.CartFeignService;
 import com.mall.order.order.feign.MemberFeignService;
+import com.mall.order.order.feign.WmsFeignService;
 import com.mall.order.order.interceptor.LoginUserInterceptor;
 import com.mall.order.order.vo.MemberAddressVo;
 import com.mall.order.order.vo.OrderConfirmVo;
 import com.mall.order.order.vo.OrderItemVo;
+import com.mall.order.order.vo.SkuStockVo;
 import com.xunqi.common.vo.MemberResponseVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -37,6 +42,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     @Autowired
     CartFeignService cartFeignService;
+
+    @Autowired
+    WmsFeignService wmsFeignService;
 
     @Autowired
     ThreadPoolExecutor executor;
@@ -69,6 +77,17 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             // 远程查询购物车所有选中的购物项
             List<OrderItemVo> items = cartFeignService.getCurrentUserCartItems();
             confirmVo.setItems(items);
+        }, executor).thenRunAsync(() -> {
+            List<OrderItemVo> items = confirmVo.getItems();
+            List<Long> collect = items.stream().map(item -> item.getSkuId()).collect(Collectors.toList());
+
+            R hasStock = wmsFeignService.getSkusHasStock(collect);
+            List<SkuStockVo> data = hasStock.getData(new TypeReference<List<SkuStockVo>>() {
+            });
+            if (data != null){
+                Map<Long, Boolean> map = data.stream().collect(Collectors.toMap(SkuStockVo::getSkuId, SkuStockVo::getHasStock));
+                confirmVo.setStocks(map);
+            }
         }, executor);
 
         // 查询用户积分

@@ -36,7 +36,7 @@ npm run dev
 | `mall-ware` | 11000 | `com.mall.mall_ware` | 仓储服务 |
 | `mall-search` | 12000 | `com.example.mall_search` | 检索服务（Elasticsearch） |
 | `mall-third-party-service` | 30000 | `com.example.mall_third_party_service` | 第三方服务（短信等） |
-| `mall-order` | — | — | 订单服务（待开发） |
+| `mall-order` | 9010 | `com.mall.mall_order`（主类）、`com.mall.order.order`（业务） | 订单服务：结算/确认页、Feign 调购物车与会员 |
 | `renren-fast` | — | `io.renren` | 后台 API（人人开源） |
 | `renren-generator` | — | `io.renren` | 代码生成器（人人开源） |
 
@@ -52,7 +52,7 @@ npm run dev
 
 ### 跨子域 Session 共享
 
-`mall-auth-server`、`mall-product`、`mall-cart` 均配置 `MallSessionConfig`：
+`mall-auth-server`、`mall-product`、`mall-cart`、`mall-order` 均配置 `MallSessionConfig`：
 
 - `@EnableRedisHttpSession` + `GenericJackson2JsonRedisSerializer`
 - Cookie 名 `GULISESSION`，域 `mall.com`
@@ -74,11 +74,31 @@ Controller 取用
   └─ CartInterceptor.threadLocal.get() → UserInfoTo
 ```
 
+### 订单结算链路
+
+```
+购物车 cartList.html「去结算」→ order.mall.com/toTrade
+OrderWebController.toTrade
+  └─ LoginUserInterceptor 拦截（拦截所有 /**）
+       ├─ 已登录 → OrderServiceImpl.confirmOrder()（线程池异步 Feign 查地址+购物车）→ confirm.html
+       └─ 未登录 → redirect auth.mall.com/login.html?redirect_url=<原页面>
+            → 登录成功后按 redirect_url 回跳（LoginController 校验以 http://order.mall.com 开头）
+Feign 跨服务识别用户
+  └─ FeignConfig RequestInterceptor 把当前请求的 Cookie 同步到远程调用
+```
+
+### 线程池与请求上下文
+
+`RequestContextHolder` 基于 ThreadLocal，线程池子线程拿不到请求上下文：
+
+- 异步任务里调 Feign 前，需先 `RequestContextHolder.setRequestAttributes(主线程捕获的 attrs)`
+- FeignConfig 的 Cookie 同步拦截器对 null 做了防御（无上下文直接跳过）
+
 ### 网关路由
 
 `mall-gateway/src/main/resources/application.yml`：
 
-- 域名路由（Host 谓词）：`mall.com` → product，`auth.mall.com` → auth，`cart.mall.com` → cart，`search.mall.com` → search
+- 域名路由（Host 谓词）：`mall.com` → product，`auth.mall.com` → auth，`cart.mall.com` → cart，`search.mall.com` → search，`order.mall.com` → order
 - 接口路由（Path 谓词）：`/api/**` → renren-fast，`/api/product/**` → product 等
 - 前端请求先到 gateway 再分发到各微服务
 
@@ -90,6 +110,8 @@ Controller 取用
 - `mall-cart` 不依赖数据库：`@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class, DruidDataSourceAutoConfigure.class})`——`mall-common` 传递引入了 Druid，两个都要排除，只排 Spring Boot 的没用
 - Nacos 注册 IP 与容器绑定地址不一致时（网关 500、直连 200 的典型症状），在 `application.properties` 加 `spring.cloud.nacos.discovery.ip` 显式指定
 - `renren-fast` 被 `mall-common` 间接引入，其 `application.yml` 的 `context-path: /renren-fast` 会污染各微服务，需在自身配置显式 `server.servlet.context-path=/`
-- 各微服务 `application.properties` 端口：gateway 88、auth 20000、product 10000、member 8000、coupon 7000、ware 11000、cart 40000、search 12000、third-party 30000
+- 各微服务 `application.properties` 端口：gateway 88、auth 20000、product 10000、member 8000、coupon 7000、ware 11000、cart 40000、search 12000、third-party 30000、order 9010
+- mall-order 包结构特殊（主类包 `com.mall.mall_order` ≠ 业务包 `com.mall.order.order`）：`@EnableFeignClients` 必须显式 `basePackages = "com.mall.order.order.feign"`，否则 Feign bean 找不到
+- 改了不重启不生效：网关路由改动需重启 mall-gateway；mall-cart 没有 devtools，Thymeleaf 模板改动必须重启服务
 - Windows 环境文件统一 CRLF 行尾；Git 默认会提示 LF→CRLF 转换警告，属正常
 - 数据库：`mall_pms`（商品）、`mall_ums`（会员）、`mall_sms`（营销）、`mall_wms`（仓储）、`mall_oms`（订单）

@@ -68,7 +68,7 @@ mall-platform/
 | `mall-cart` | 40000 | 购物车（Redis），临时用户标识，登录合并 |
 | `mall-search` | 12000 | 商品检索（Elasticsearch） |
 | `mall-third-party-service` | 30000 | 短信等第三方接口 |
-| `mall-order` | — | 订单（待开发） |
+| `mall-order` | 9010 | 订单结算/确认页，Feign 调用购物车与会员服务 |
 
 ## 技术栈
 
@@ -84,6 +84,7 @@ mall-platform/
 | 会话 | Spring Session Data Redis | — |
 | 搜索 | Elasticsearch | 7.x |
 | 远程调用 | OpenFeign | 3.1.0 |
+| 消息队列 | RabbitMQ（Spring AMQP） | — |
 | 模板引擎 | Thymeleaf | — |
 | 语言 | Java | 8 |
 | 前端框架 | Vue | 2.5 |
@@ -131,7 +132,7 @@ mvn clean install -DskipTests
 # 启动顺序
 # 1. Nacos、MySQL、Redis、Elasticsearch
 # 2. mall-gateway
-# 3. mall-product → mall-member → mall-cart → mall-search → mall-auth-server
+# 3. mall-product → mall-member → mall-cart → mall-search → mall-auth-server → mall-order
 # 4. 其余服务按需启动
 ```
 
@@ -159,7 +160,7 @@ npm run dev
 
 ### 跨子域 Session 共享
 
-`mall-auth-server`、`mall-product`、`mall-cart` 均接入 Spring Session Redis：
+`mall-auth-server`、`mall-product`、`mall-cart`、`mall-order` 均接入 Spring Session Redis：
 
 - Cookie 名统一 `GULISESSION`，域统一 `mall.com`（跨子域可见）
 - 序列化统一 `GenericJackson2JsonRedisSerializer`（JSON 格式）
@@ -176,6 +177,12 @@ npm run dev
 - 上架商品同步至 ES 索引 `mall_product`
 - `search.mall.com/list.html` 支持：关键字、三级分类、品牌、属性、价格区间、排序、分页、高亮、聚合筛选
 
+### 订单结算
+
+- 购物车「去结算」跳转 `order.mall.com/toTrade`，未登录强制跳登录页，登录成功后自动回跳结算页
+- 结算页异步聚合收货地址（mall-member）与选中购物项（mall-cart），Feign 调用自动同步 Cookie 识别用户
+- 订单确认页 `confirm.html` 已接入，订单提交/支付待开发
+
 ## 开发进度
 
 - [x] 商品服务（SPU/SKU CRUD + 详情页 + 首页分类）
@@ -183,7 +190,8 @@ npm run dev
 - [x] 认证服务（登录/注册/短信 + Spring Session 共享）
 - [x] 会员服务（注册、登录校验）
 - [x] 购物车（增删改查、选中、临时用户、登录合并）
-- [ ] 订单服务
+- [x] 订单确认（结算跳转、登录拦截回跳、Feign 聚合地址与购物车）
+- [ ] 订单提交
 - [ ] 支付
 - [ ] 仓储（库存锁定）
 - [ ] 优惠券（领取、使用）

@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 订单确认页需要用的数据
@@ -29,9 +30,22 @@ public class OrderConfirmVo {
     @Setter @Getter
     private Integer integration;
 
+    @Setter @Getter
+    Map<Long, Boolean> stocks;
+
     // 防重令牌
     @Setter @Getter
     String orderToken;
+
+    public Integer getCount(){
+        Integer i = 0;
+        if (items != null){
+            for (OrderItemVo item : items) {
+                i += item.getCount();
+            }
+        }
+        return i;
+    }
 
     // 订单总额
 //    BigDecimal total;

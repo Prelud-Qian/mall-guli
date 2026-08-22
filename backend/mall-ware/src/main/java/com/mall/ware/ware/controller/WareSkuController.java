@@ -28,6 +28,7 @@ public class WareSkuController {
     @Autowired
     private WareSkuService wareSkuService;
 
+
     // 查询sku是否有库存
     @PostMapping("/hasstock")
     public R getSkusHasStock(@RequestBody List<Long> skuIds){
