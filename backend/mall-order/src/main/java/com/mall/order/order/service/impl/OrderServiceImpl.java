@@ -2,25 +2,26 @@ package com.mall.order.order.service.impl;
 
 import com.alibaba.fastjson.TypeReference;
 import com.mall.common.utils.R;
+import com.mall.order.order.constant.OrderConstant;
 import com.mall.order.order.feign.CartFeignService;
 import com.mall.order.order.feign.MemberFeignService;
 import com.mall.order.order.feign.WmsFeignService;
 import com.mall.order.order.interceptor.LoginUserInterceptor;
-import com.mall.order.order.vo.MemberAddressVo;
-import com.mall.order.order.vo.OrderConfirmVo;
-import com.mall.order.order.vo.OrderItemVo;
-import com.mall.order.order.vo.SkuStockVo;
+import com.mall.order.order.vo.*;
 import com.xunqi.common.vo.MemberResponseVo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -48,6 +49,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     @Autowired
     ThreadPoolExecutor executor;
+
+    @Autowired
+    RedisTemplate redisTemplate;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -96,11 +100,23 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
         // 其他数据自动计算
 
-        // TODO 防重令牌
+        // 防重令牌
+        String token = UUID.randomUUID().toString().replace("-", "");
+        redisTemplate.opsForValue().set(OrderConstant.USER_ORDER_TOKEN_PREFIX + memberResponseVo.getId(), token, 30, TimeUnit.MINUTES);
+        confirmVo.setOrderToken(token);
 
         CompletableFuture.allOf(getAddressFuture, cartFuture).get();
 
         return confirmVo;
+    }
+
+    @Override
+    public SubmitOrderResponseVo submitOrder(OrderSubmitVo vo) {
+        // 去创建订单，验证令牌，锁库存
+
+
+
+        return null;
     }
 
 }
