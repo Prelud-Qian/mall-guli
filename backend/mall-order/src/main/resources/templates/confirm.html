@@ -973,6 +973,10 @@
                 });
 
                 highlight();
+                // 页面加载时为默认地址拉取运费
+                $(".addr-item p[def='1']").each(function () {
+                    getFare($(this).attr("addrId"));
+                });
             })
 
 			function highlight() {
